@@ -20,6 +20,18 @@ void* Screenshot::get_bitmap() {
   return CGBitmapContextGetData(_bitmap_context);
 }
 
+size_t Screenshot::get_width() {
+  return CGBitmapContextGetWidth(_bitmap_context);
+}
+
+size_t Screenshot::get_height() {
+  return CGBitmapContextGetHeight(_bitmap_context);
+}
+
+size_t Screenshot::get_bits_per_pixel() {
+  return CGBitmapContextGetBitsPerPixel(_bitmap_context);
+}
+
 bool Screenshot::write_png(const char* filepath) {
   CFURLRef url = CFURLCreateWithFileSystemPath(
     NULL, 

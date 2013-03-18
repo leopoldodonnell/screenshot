@@ -23,6 +23,10 @@ public:
   // Get the raw bitmap for the Screenshot
   void *get_bitmap();
   
+  size_t get_width();
+  size_t get_height();
+  size_t get_bits_per_pixel();
+  
   // Write a PNG file to filename. Return true on success.
   bool write_png(const char* filename);
   

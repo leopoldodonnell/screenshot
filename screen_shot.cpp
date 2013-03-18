@@ -40,17 +40,40 @@ bool Screenshot::write_png(const char* filepath) {
     false);
   CGImageDestinationRef destination = CGImageDestinationCreateWithURL(url, kUTTypePNG, 1, NULL);
   
+  store_image(destination);
+    
+  CFRelease(destination);
+
+  return true;
+}
+
+CFMutableDataRef Screenshot::create_png_data(size_t &length) {
+  
+  length = get_width() * get_height() * (get_bits_per_pixel()/8);
+  
+  CFMutableDataRef png_data         = CFDataCreateMutable(NULL, 0);
+  CGImageDestinationRef destination = CGImageDestinationCreateWithData(png_data, kUTTypePNG, 1, NULL);
+  
+  if (!store_image(destination)) {
+    length = 0;
+  }
+  
+  CFRelease(destination);
+  
+  return png_data;  
+}
+
+bool Screenshot::store_image(CGImageDestinationRef destination) {
   CGImageRef image = CGBitmapContextCreateImage(_bitmap_context);
 
   CGImageDestinationAddImage(destination, image, nil);
 
   if (!CGImageDestinationFinalize(destination)) {
-      fprintf(stderr, "Failed to write image to %s", filepath);
+      fprintf(stderr, "Failed to write image to destination\n");
       return false;
   }
   
   CFRelease(image);
-  CFRelease(destination);
+  
   return true;
 }
-

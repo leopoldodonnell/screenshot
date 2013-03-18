@@ -20,6 +20,7 @@ int main(int argc, const char * argv[])
   ScreenShooter shooter;
   Screenshot* screenshot = shooter.take_screenshot();
   screenshot->write_png(argv[1]);
+  
   delete screenshot;
   
   return 0;

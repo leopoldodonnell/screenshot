@@ -51,7 +51,7 @@ CFMutableDataRef Screenshot::create_png_data(size_t &length) {
   
   length = get_width() * get_height() * (get_bits_per_pixel()/8);
   
-  CFMutableDataRef png_data         = CFDataCreateMutable(NULL, 0);
+  CFMutableDataRef png_data         = CFDataCreateMutable(NULL, length);
   CGImageDestinationRef destination = CGImageDestinationCreateWithData(png_data, kUTTypePNG, 1, NULL);
   
   if (!store_image(destination)) {

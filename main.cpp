@@ -13,7 +13,7 @@
 int main(int argc, const char * argv[])
 {
   if (argc < 2) {
-    fprintf(stderr, "Error - Usage: screenshooter [-c compression] <filename.[jpg, png, tiff, gif, bmp]>\n");
+    fprintf(stderr, "Error - Usage: screenshooter [-c compression] <filename.[jpg, jp2, png, tiff, gif, bmp]>\n");
     return 1;
   }
   
@@ -31,8 +31,11 @@ int main(int argc, const char * argv[])
   }
   
   if (strcasestr(filename, ".jpg")) {
-    format = kUTTypeJPEG2000;
+    format = kUTTypeJPEG;
   }
+  else if (strcasestr(filename, ".jp2")) {
+    format = kUTTypeJPEG2000;
+  }  
   else if (strcasestr(filename, ".png")) {
     format = kUTTypePNG;    
   }
@@ -46,7 +49,7 @@ int main(int argc, const char * argv[])
     format = kUTTypeBMP;        
   }
   else {
-    fprintf(stderr, "Error filetype for %s is not supported: Try one of [jpg, png, tiff, gif, bmp]\n", filename);
+    fprintf(stderr, "Error filetype for %s is not supported: Try one of [jpg, jp2, png, tiff, gif, bmp]\n", filename);
     return 1;
   }
   

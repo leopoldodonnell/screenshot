@@ -23,7 +23,7 @@ class ScreenShooter {
 
     // Allocate and take a new screenshot of all active screens. The caller
     // is responsible for its deletion.
-    Screenshot* take_screenshot();
+    Screenshot* take_screenshot(const CFStringRef format, float compression);
   
   private:
     void calculate_bounds();

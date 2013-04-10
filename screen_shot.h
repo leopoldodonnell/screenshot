@@ -17,7 +17,7 @@
  */
 class Screenshot {
 public:
-  Screenshot(CGContextRef bitmap_context);
+  Screenshot(CGContextRef bitmap_context, const CFStringRef format, float compression);
   ~Screenshot();
   
   // Get the raw bitmap for the Screenshot
@@ -31,13 +31,16 @@ public:
   bool write_png(const char* filename);
 
   // Returns a png file in CFMutableDataRef which must be released by the caller. 
-  CFMutableDataRef create_png_data(size_t &length);
+  CFMutableDataRef create_img_data(size_t &length);
   
 private:
-  bool store_image(CGImageDestinationRef destination);
+  size_t  calculate_image_memory(CFMutableDataRef img_data, size_t initial_size);
+  bool    store_image(CGImageDestinationRef destination);
   
 private:
-  CGContextRef _bitmap_context;
+  CGContextRef      _bitmap_context;
+  const CFStringRef _format;
+  float             _compression;
 };
 
 #endif // _SCREEN_SHOT_H_

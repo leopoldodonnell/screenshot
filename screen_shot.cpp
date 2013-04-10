@@ -10,7 +10,8 @@
 #include "screen_shot.h"
 
 
-Screenshot::Screenshot(CGContextRef bitmap_context) : _bitmap_context(bitmap_context) {}
+Screenshot::Screenshot(CGContextRef bitmap_context, const CFStringRef format, float compression) : 
+  _bitmap_context(bitmap_context), _format(format), _compression(compression) {}
 
 Screenshot::~Screenshot() {
   CGContextRelease(_bitmap_context); 
@@ -38,7 +39,7 @@ bool Screenshot::write_png(const char* filepath) {
     CFStringCreateWithCString(NULL, filepath, kCFStringEncodingUTF8),
     kCFURLPOSIXPathStyle,
     false);
-  CGImageDestinationRef destination = CGImageDestinationCreateWithURL(url, kUTTypePNG, 1, NULL);
+  CGImageDestinationRef destination = CGImageDestinationCreateWithURL(url, _format, 1, NULL);
   
   store_image(destination);
     
@@ -47,26 +48,51 @@ bool Screenshot::write_png(const char* filepath) {
   return true;
 }
 
-CFMutableDataRef Screenshot::create_png_data(size_t &length) {
+CFMutableDataRef Screenshot::create_img_data(size_t &length) {
   
   length = get_width() * get_height() * (get_bits_per_pixel()/8);
   
-  CFMutableDataRef png_data         = CFDataCreateMutable(NULL, length);
-  CGImageDestinationRef destination = CGImageDestinationCreateWithData(png_data, kUTTypePNG, 1, NULL);
+  CFMutableDataRef img_data         = CFDataCreateMutable(NULL, length);
+  CGImageDestinationRef destination = CGImageDestinationCreateWithData(img_data, _format, 1, NULL);
   
   if (!store_image(destination)) {
     length = 0;
   }
   
+  length = calculate_image_memory(img_data, length);
+    
   CFRelease(destination);
   
-  return png_data;  
+  return img_data;  
+}
+
+/*
+ * Calculate the actual size used by an image.
+ */
+size_t Screenshot::calculate_image_memory(CFMutableDataRef img_data, size_t initial_size) {
+  UInt8 *data = CFDataGetMutableBytePtr(img_data);
+
+  size_t real_size = initial_size / 4;  // Its already seriously compressed, so reduce the start value
+  
+  // Traverse backwards until there's some data
+  while (data[real_size] == 0) {
+    --real_size;
+  }
+  // You'll have gone too far, add 1
+  return real_size + 1;  
 }
 
 bool Screenshot::store_image(CGImageDestinationRef destination) {
   CGImageRef image = CGBitmapContextCreateImage(_bitmap_context);
 
-  CGImageDestinationAddImage(destination, image, nil);
+  CFStringRef myKeys[1];
+  CFTypeRef myValues[1];
+  CFDictionaryRef myOptions = NULL;
+  myKeys[0] = kCGImageDestinationLossyCompressionQuality;
+  myValues[0] = CFNumberCreate(NULL, kCFNumberFloatType, &_compression);
+  myOptions = CFDictionaryCreate(NULL, (const void**)myKeys, (const void**)myValues, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+  
+  CGImageDestinationAddImage(destination, image, myOptions);
 
   if (!CGImageDestinationFinalize(destination)) {
       fprintf(stderr, "Failed to write image to destination\n");
@@ -74,6 +100,7 @@ bool Screenshot::store_image(CGImageDestinationRef destination) {
   }
   
   CFRelease(image);
+  CFRelease(myOptions);
   
   return true;
 }

@@ -27,7 +27,7 @@ ScreenShooter::~ScreenShooter() {
   delete [] _display_bounds;
 }
 
-Screenshot* ScreenShooter::take_screenshot() {
+Screenshot* ScreenShooter::take_screenshot(const CFStringRef format, float compression) {
   CGImageRef* images = new CGImageRef[_dsp_count];
    
   /* Grab the images */
@@ -62,7 +62,7 @@ Screenshot* ScreenShooter::take_screenshot() {
   
   delete [] images;
 
-  return new Screenshot(context);
+  return new Screenshot(context, format, compression);
 }
 
 /* Calculate the _bottom_left and _top_right corners of our virtual display.
